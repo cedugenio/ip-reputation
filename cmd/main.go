@@ -13,20 +13,20 @@ func main() {
     store.InitRedis()
 
     go func() {
-        for {
-            log.Println("[FETCHER] Atualizando IPs maliciosos...")
-            ips, err := fetcher.FetchFireHOL()
-            if err != nil {
-                log.Println("Erro ao buscar FireHOL:", err)
-            } else {
-                for _, ip := range ips {
-                    _ = store.SaveIP(ip, 1, time.Hour*24)
-                }
-                log.Printf("Adicionados %d IPs\n", len(ips))
-            }
-            time.Sleep(time.Hour * 6)
+    	for {
+        	log.Println("[FETCHER] Coletando dados de múltiplas fontes...")
+        	ips, err := fetcher.FetchAllSources()
+        	if err != nil {
+            	log.Println("Erro na coleta:", err)
+        	} else {
+            	for _, ip := range ips {
+                	_ = store.SaveIP(ip, 1, 24*time.Hour)
+            	}
+            log.Printf("Total de IPs coletados: %d\n", len(ips))
         }
-    }()
+        time.Sleep(6 * time.Hour)
+    }
+	}()
 
     api.StartServer()
 }
